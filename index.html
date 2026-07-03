@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>喵喵背单词</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 页面容器 -->
+  <div id="app">
+    <!-- 首页 -->
+    <div id="page-home" class="page active">
+      <div class="header">
+        <h1>🐱 喵喵背单词</h1>
+        <p class="subtitle">高考4500词 + 四级1000词</p>
+      </div>
+      <div class="stats-card">
+        <div class="stat-item">
+          <div class="stat-num" id="total-words">4500</div>
+          <div class="stat-label">总词数</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" id="learned-words">0</div>
+          <div class="stat-label">已学</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" id="streak-days">0</div>
+          <div class="stat-label">连续天数</div>
+        </div>
+      </div>
+      <div class="today-card">
+        <div class="today-title">📅 今日任务</div>
+        <div class="today-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" id="today-progress"></div>
+          </div>
+          <div class="progress-text">
+            <span id="today-learned">0</span> / <span id="today-total">30</span> 词
+          </div>
+        </div>
+        <div class="today-detail">
+          <span class="badge">新词 <b id="new-count">0</b></span>
+          <span class="badge review">复习 <b id="review-count">0</b></span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary" onclick="app.startStudy()">📚 开始学习</button>
+        <button class="btn-secondary" onclick="app.goPage('review')">🔄 复习单词</button>
+        <button class="btn-secondary" onclick="app.goPage('spell')">🗂️ 陌生单词库</button>
+        <button class="btn-secondary" onclick="app.goPage('stats')">📊 学习统计</button>
+      </div>
+    </div>
+
+    <!-- 学习页 -->
+    <div id="page-study" class="page">
+      <div class="study-header">
+        <button class="back-btn" onclick="app.goHome()">←</button>
+        <div class="study-progress">
+          <span id="study-current">1</span> / <span id="study-total">30</span>
+        </div>
+        <div class="streak-display" id="streak-display"></div>
+      </div>
+      <div class="word-card" id="word-card">
+        <div class="word-text" id="word-text"></div>
+        <div class="word-phonetic" id="word-phonetic"></div>
+        <button class="audio-btn" onclick="app.playAudio()">🔊</button>
+        <div class="word-meaning hidden" id="word-meaning"></div>
+        <div class="memory-section hidden" id="memory-section">
+          <div class="memory-title">💡 记忆法</div>
+          <div class="memory-item">
+            <span class="memory-label">联想：</span>
+            <span id="memory-association"></span>
+          </div>
+          <div class="memory-item">
+            <span class="memory-label">词根：</span>
+            <span id="memory-root"></span>
+          </div>
+          <div class="memory-item">
+            <span class="memory-label">谐音：</span>
+            <span id="memory-homophonic"></span>
+          </div>
+          <div class="example-box">
+            <div id="example-en"></div>
+            <div id="example-cn"></div>
+          </div>
+        </div>
+        <button class="show-meaning-btn" id="show-meaning-btn" onclick="app.toggleMeaning()">👆 点击查看释义</button>
+      </div>
+      <div class="study-actions" id="study-actions">
+        <button class="btn-wrong" onclick="app.markAnswer(false)">😕 不认识</button>
+        <button class="btn-vague" onclick="app.markAnswer('vague')">🤔 模糊</button>
+        <button class="btn-known" onclick="app.markAnswer(true)">😊 认识</button>
+      </div>
+    </div>
+
+    <!-- 复习页 -->
+    <div id="page-review" class="page">
+      <div class="page-header">
+        <button class="back-btn" onclick="app.goHome()">←</button>
+        <h2>🔄 今日复习</h2>
+      </div>
+      <div class="review-list" id="review-list"></div>
+    </div>
+
+    <!-- 陌生单词库页 -->
+    <div id="page-spell" class="page">
+      <div class="page-header">
+        <button class="back-btn" onclick="app.goHome()">←</button>
+        <h2>🗂️ 陌生单词库</h2>
+      </div>
+      <div class="spell-card">
+        <div class="spell-meaning" id="spell-meaning"></div>
+        <div class="spell-phonetic" id="spell-phonetic"></div>
+        <div class="spell-inputs" id="spell-inputs"></div>
+        <div class="spell-hint" id="spell-hint"></div>
+        <div class="spell-buttons" style="display:flex;gap:8px;justify-content:center;margin-top:12px;">
+          <button class="btn-primary" onclick="app.checkSpell()">检查</button>
+          <button class="btn-secondary" onclick="app.showSpellAnswer()">显示答案</button>
+          <button class="btn-secondary" onclick="app.skipSpell()">跳过</button>
+        </div>
+        <div class="spell-result hidden" id="spell-result" style="margin-top:12px;text-align:center;"></div>
+      </div>
+    </div>
+
+    <!-- 统计页 -->
+    <div id="page-stats" class="page">
+      <div class="page-header">
+        <button class="back-btn" onclick="app.goHome()">←</button>
+        <h2>📊 学习统计</h2>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📚</div>
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-name">总学习词数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-value" id="stat-streak">0</div>
+          <div class="stat-name">连续打卡</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-value" id="stat-days">0</div>
+          <div class="stat-name">学习天数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-value" id="stat-accuracy">0%</div>
+          <div class="stat-name">正确率</div>
+        </div>
+      </div>
+      <div class="calendar-section">
+        <h3>📅 打卡日历</h3>
+        <div class="calendar" id="calendar"></div>
+      </div>
+    </div>
+
+    <!-- 完成弹窗 -->
+    <div class="modal hidden" id="complete-modal">
+      <div class="modal-content">
+        <div class="complete-emoji">🎉</div>
+        <h2>今日任务完成！</h2>
+        <p id="complete-text"></p>
+        <div class="complete-stars" id="complete-stars"></div>
+        <button class="btn-primary" onclick="app.closeComplete()">继续加油</button>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast hidden" id="toast"></div>
+  </div>
+
+  <script src="words-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
